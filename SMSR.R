@@ -21,8 +21,6 @@ SMSR <- function(y, data, kappa, lambda = 0.5, varRemove, measure = "AIC") {
     maxBag <- getMaxBag(vars = availableVars,
                        lambda = lambda)
     
-    
-    
     # 2) Initialise first model with random sample, 
     numVars <- uniformRandom(maxBag)
     varsToAdd <- sample(availableVars, numVars, replace = FALSE)
