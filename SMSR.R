@@ -9,6 +9,7 @@
 
 library(dplyr)
 library(smbinning)
+library(olsrr)
 
 SMSR <- function(y, data, kappa, lambda = 0.5, varRemove, measure = "AIC") {
     
@@ -17,10 +18,17 @@ SMSR <- function(y, data, kappa, lambda = 0.5, varRemove, measure = "AIC") {
                                y = y)
     maxBag = getMaxBag(vars = vars,
                        lambda = lambda)
-    }
+    
     
     # 2) Initialise first model with random sample, 
     numVars <- uniformRandom(maxBag)
+    
+    varsToAdd <- sample(vars, numVars, replace = FALSE)
+    
+    modelFormula <- as.formula(paste(y, "~", paste(varsToAdd,collapse = " + ")))
+
+    intModel <- lm(modelFormula, data = data)
+    return(summary(intModel))
     
     
     # 3) Add/Subtract bag and loop. Return AIC.
@@ -44,5 +52,5 @@ getMaxBag <- function(vars,lambda) {
 SMSR(y = "FlagGB",
      data = chileancredit,
      kappa = 1,
-     maxBag = 20,
+     lambda = 0.5,
      varRemove = NULL)
