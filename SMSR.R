@@ -13,22 +13,27 @@ library(olsrr)
 
 SMSR <- function(y, data, kappa, lambda = 0.5, varRemove, measure = "AIC") {
     
+    varsInModel <- c()
+    
     # 1) Input Sanitation.
-    vars <- removeResponseVars(data = data,
+    availableVars <- removeResponseVars(data = data,
                                y = y)
-    maxBag = getMaxBag(vars = vars,
+    maxBag <- getMaxBag(vars = availableVars,
                        lambda = lambda)
+    
     
     
     # 2) Initialise first model with random sample, 
     numVars <- uniformRandom(maxBag)
-    
-    varsToAdd <- sample(vars, numVars, replace = FALSE)
+    varsToAdd <- sample(availableVars, numVars, replace = FALSE)
     
     modelFormula <- as.formula(paste(y, "~", paste(varsToAdd,collapse = " + ")))
-
     intModel <- lm(modelFormula, data = data)
-    return(summary(intModel))
+    
+        # 2.1) Update available selections.
+        availableVars <- setdiff(availableVars,varsToAdd)
+        varsInModel <- c(varsToAdd,varsInModel)
+
     
     
     # 3) Add/Subtract bag and loop. Return AIC.
